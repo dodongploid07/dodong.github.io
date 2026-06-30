@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Will You Go Out With Me?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,500&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root{
+    --blush:#fff1ee;
+    --rose:#ff6f91;
+    --rose-deep:#e84b73;
+    --plum:#5b3a4d;
+    --gold:#f4b942;
+    --cream:#fffaf6;
+    --leaf:#7bbf8e;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+
+  body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:'Nunito',sans-serif;
+    background:
+      radial-gradient(circle at 15% 20%, #ffe1e8 0%, transparent 45%),
+      radial-gradient(circle at 85% 80%, #ffd9c2 0%, transparent 50%),
+      linear-gradient(135deg, var(--blush) 0%, #ffe3d6 100%);
+    overflow:hidden;
+    padding:24px;
+    position:relative;
+    touch-action:manipulation;
+  }
+
+  /* ambient floating hearts */
+  .ambient{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+  .ambient span{
+    position:absolute;
+    bottom:-10%;
+    font-size:1.4rem;
+    opacity:0.35;
+    animation:rise linear infinite;
+  }
+  @keyframes rise{
+    0%{transform:translateY(0) rotate(0deg);opacity:0;}
+    10%{opacity:0.4;}
+    100%{transform:translateY(-115vh) rotate(25deg);opacity:0;}
+  }
+
+  .card{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    background:var(--cream);
+    padding:40px 28px;
+    border-radius:28px;
+    box-shadow:0 20px 50px rgba(232,75,115,0.18), 0 2px 8px rgba(0,0,0,0.04);
+    width:100%;
+    max-width:420px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    border:1px solid #ffe4e4;
+  }
+
+  /* ---------- ASK SCREEN ---------- */
+  .icon-wrap{
+    height:90px;
+    font-size:64px;
+    margin-bottom:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    animation:float 3s ease-in-out infinite;
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(0) scale(1);}
+    50%{transform:translateY(-10px) scale(1.04);}
+  }
+
+  .eyebrow{
+    font-size:0.72rem;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--rose-deep);
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    color:var(--plum);
+    font-size:1.65rem;
+    margin-bottom:26px;
+    min-height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1.3;
+    padding:0 6px;
+    transition:transform .25s ease;
+  }
+  h1.success-title{
+    font-style:italic;
+    color:var(--rose-deep);
+  }
+
+  .btn-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:16px;
+    width:100%;
+    min-height:170px;
+    position:relative;
+  }
+
+  button{
+    padding:15px 30px;
+    font-size:1.1rem;
+    font-weight:800;
+    font-family:'Nunito',sans-serif;
+    border:none;
+    border-radius:50px;
+    cursor:pointer;
+    transition:transform .25s cubic-bezier(.175,.885,.32,1.275), box-shadow .25s ease;
+    letter-spacing:0.01em;
+  }
+
+  #yes-btn{
+    background:linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
+    color:#fff;
+    box-shadow:0 8px 20px rgba(232,75,115,0.35);
+    z-index:10;
+  }
+  #yes-btn:active{transform:scale(0.96);}
+
+  #no-btn{
+    background:#fff;
+    color:var(--plum);
+    border:2px solid #f1d9d9;
+    box-shadow:0 4px 14px rgba(0,0,0,0.05);
+  }
+
+  .hint{
+    margin-top:18px;
+    font-size:0.78rem;
+    color:#c98a9a;
+    font-weight:600;
+  }
+
+  /* ---------- SUCCESS / PLANNER SCREEN ---------- */
+  .hidden{display:none !important;}
+
+  .confetti-burst{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:visible;
+  }
+  .confetti-piece{
+    position:absolute;
+    top:40%;
+    left:50%;
+    width:8px;
+    height:14px;
+    opacity:0;
+  }
+
+  #success-screen{width:100%;}
+
+  .success-emoji{
+    font-size:58px;
+    margin-bottom:8px;
+    animation:pop .6s cubic-bezier(.175,.885,.32,1.275);
+  }
+  @keyframes pop{
+    0%{transform:scale(0);}
+    70%{transform:scale(1.15);}
+    100%{transform:scale(1);}
+  }
+
+  .planner-sub{
+    font-size:0.88rem;
+    color:#9c7382;
+    margin-bottom:22px;
+    font-weight:600;
+  }
+
+  .category{
+    width:100%;
+    text-align:left;
+    margin-bottom:20px;
+  }
+  .category-title{
+    font-family:'Fraunces',serif;
+    font-size:1rem;
+    font-weight:600;
+    color:var(--plum);
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .category-title .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--rose);
+    display:inline-block;
+  }
+
+  .pill-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .pill{
+    border:2px solid #f4dde4;
+    background:#fff;
+    color:var(--plum);
+    font-family:'Nunito',sans-serif;
+    font-weight:700;
+    font-size:0.84rem;
+    padding:9px 16px;
+    border-radius:50px;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .pill:hover{border-color:var(--rose);transform:translateY(-1px);}
+  .pill.selected{
+    background:linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
+    color:#fff;
+    border-color:transparent;
+    box-shadow:0 6px 14px rgba(232,75,115,0.3);
+  }
+
+  .plan-summary{
+    width:100%;
+    margin-top:6px;
+    padding:18px;
+    background:linear-gradient(135deg, #fff5f0 0%, #ffeef2 100%);
+    border-radius:18px;
+    border:1px dashed #f0b8c6;
+    font-size:0.9rem;
+    color:var(--plum);
+    line-height:1.6;
+    font-weight:600;
+    min-height:54px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  .plan-summary .placeholder{color:#c79bab;font-weight:600;}
+  .plan-summary strong{color:var(--rose-deep);}
+
+  .confirm-btn{
+    margin-top:18px;
+    width:100%;
+    background:linear-gradient(135deg, var(--gold) 0%, #e89b2e 100%);
+    color:#fff;
+    box-shadow:0 8px 20px rgba(232,155,46,0.32);
+    opacity:0.45;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .confirm-btn.active{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .confirm-btn.active:active{transform:scale(0.97);}
+
+  /* ---------- FINAL SCREEN ---------- */
+  #final-screen{width:100%;}
+  .final-emoji{font-size:64px;margin-bottom:10px;animation:pop .6s cubic-bezier(.175,.885,.32,1.275);}
+  .final-card{
+    margin-top:6px;
+    width:100%;
+    padding:22px;
+    background:linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
+    border-radius:20px;
+    color:#fff;
+  }
+  .final-card .label{
+    font-size:0.7rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    opacity:0.85;
+    font-weight:800;
+    margin-bottom:6px;
+  }
+  .final-card .detail{
+    font-family:'Fraunces',serif;
+    font-size:1.25rem;
+    font-style:italic;
+    line-height:1.4;
+  }
+
+  /* ---------- CONFIRM MODAL ---------- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(91,58,77,0.45);
+    backdrop-filter:blur(4px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:24px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .modal-overlay.show{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .modal-box{
+    background:var(--cream);
+    border-radius:24px;
+    padding:30px 26px;
+    max-width:360px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 24px 60px rgba(0,0,0,0.25);
+    transform:scale(0.85) translateY(20px);
+    transition:transform .3s cubic-bezier(.175,.885,.32,1.275);
+  }
+  .modal-overlay.show .modal-box{
+    transform:scale(1) translateY(0);
+  }
+
+  .modal-emoji{font-size:42px;margin-bottom:8px;}
+  .modal-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-style:italic;
+    color:var(--plum);
+    font-size:1.2rem;
+    margin-bottom:6px;
+  }
+  .modal-sub{
+    font-size:0.82rem;
+    color:#a07b8c;
+    font-weight:600;
+    margin-bottom:18px;
+  }
+  .modal-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:22px;
+    text-align:left;
+  }
+  .modal-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fff5f0;
+    border:1px solid #f4dde4;
+    border-radius:14px;
+    padding:10px 14px;
+    font-size:0.88rem;
+    font-weight:700;
+    color:var(--plum);
+  }
+  .modal-row .tag{
+    font-size:0.65rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--rose-deep);
+    font-weight:800;
+    min-width:52px;
+  }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+  }
+  .modal-actions button{
+    flex:1;
+    padding:12px 14px;
+    font-size:0.92rem;
+  }
+  #modal-edit{
+    background:#fff;
+    color:var(--plum);
+    border:2px solid #f1d9d9;
+  }
+  #modal-confirm{
+    background:linear-gradient(135deg, var(--leaf) 0%, #5fa873 100%);
+    color:#fff;
+    box-shadow:0 8px 18px rgba(123,191,142,0.35);
+  }
+  #modal-confirm:active, #modal-edit:active{transform:scale(0.96);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient" id="ambient"></div>
+
+<div class="card" id="main-card">
+
+  <!-- ASK SCREEN -->
+  <div id="ask-screen">
+    <div class="eyebrow">A small question</div>
+    <div class="icon-wrap" id="emoji-display">🥺</div>
+    <h1 id="prompt-text">Will you go out with me?</h1>
+    <div class="btn-row">
+      <button id="yes-btn">Yes!</button>
+      <button id="no-btn">No</button>
+    </div>
+    <div class="hint" id="hint-text">tap one to find out 👀</div>
+  </div>
+
+  <!-- PLANNER SCREEN -->
+  <div id="success-screen" class="hidden">
+    <div class="confetti-burst" id="confetti"></div>
+    <div class="success-emoji">💖</div>
+    <h1 class="success-title">Yay, it's a date!</h1>
+    <p class="planner-sub">now let's plan the perfect one — pick your faves</p>
+
+    <div class="category">
+      <div class="category-title"><span class="dot"></span>Movie night</div>
+      <div class="pill-grid" data-group="movie">
+        <button class="pill">Rom-com</button>
+        <button class="pill">Action</button>
+        <button class="pill">Horror</button>
+        <button class="pill">Animated</button>
+        <button class="pill">Drama</button>
+      </div>
+    </div>
+
+    <div class="category">
+      <div class="category-title"><span class="dot"></span>What we're eating</div>
+      <div class="pill-grid" data-group="food">
+        <button class="pill">Ramen</button>
+        <button class="pill">Pizza</button>
+        <button class="pill">Korean BBQ</button>
+        <button class="pill">Sushi</button>
+        <button class="pill">Burgers</button>
+      </div>
+    </div>
+
+    <div class="category">
+      <div class="category-title"><span class="dot"></span>Where we're going</div>
+      <div class="pill-grid" data-group="place">
+        <button class="pill">Beach walk</button>
+        <button class="pill">Café</button>
+        <button class="pill">Arcade</button>
+        <button class="pill">Mall</button>
+        <button class="pill">Park picnic</button>
+      </div>
+    </div>
+
+    <div class="plan-summary" id="plan-summary">
+      <span class="placeholder">pick one from each to build the plan ✨</span>
+    </div>
+
+    <button class="confirm-btn" id="confirm-btn">Lock in our date 💌</button>
+  </div>
+
+  <!-- FINAL SCREEN -->
+  <div id="final-screen" class="hidden">
+    <div class="final-emoji">🎉</div>
+    <h1 class="success-title">It's official!</h1>
+    <div class="final-card">
+      <div class="label">our plan</div>
+      <div class="detail" id="final-detail"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-emoji">📋</div>
+    <div class="modal-title">Double-check the plan?</div>
+    <div class="modal-sub">make sure this is the date of your dreams</div>
+    <div class="modal-list">
+      <div class="modal-row"><span class="tag">Movie</span><span id="modal-movie"></span></div>
+      <div class="modal-row"><span class="tag">Food</span><span id="modal-food"></span></div>
+      <div class="modal-row"><span class="tag">Place</span><span id="modal-place"></span></div>
+    </div>
+    <div class="modal-actions">
+      <button id="modal-edit">Edit</button>
+      <button id="modal-confirm">Confirm 💖</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ambient floating hearts
+  const ambient = document.getElementById('ambient');
+  const ambientEmojis = ['💕','💗','🌸','✨'];
+  for(let i=0;i<14;i++){
+    const s = document.createElement('span');
+    s.textContent = ambientEmojis[Math.floor(Math.random()*ambientEmojis.length)];
+    s.style.left = Math.random()*100+'%';
+    s.style.fontSize = (1+Math.random()*1.4)+'rem';
+    s.style.animationDuration = (8+Math.random()*10)+'s';
+    s.style.animationDelay = (Math.random()*10)+'s';
+    ambient.appendChild(s);
+  }
+
+  const yesBtn = document.getElementById('yes-btn');
+  const noBtn = document.getElementById('no-btn');
+  const promptText = document.getElementById('prompt-text');
+  const emojiDisplay = document.getElementById('emoji-display');
+  const hintText = document.getElementById('hint-text');
+  const askScreen = document.getElementById('ask-screen');
+  const successScreen = document.getElementById('success-screen');
+  const finalScreen = document.getElementById('final-screen');
+
+  const noMessages = [
+    "Are you sure? 💔",
+    "Plllls? 🥺",
+    "Think about it again...",
+    "Don't do this to me 😭",
+    "I'm gonna cry...",
+    "You're breaking my heart!",
+    "Clicking 'No' is no longer an option.",
+    "Error: incorrect choice. Try the pink one."
+  ];
+  const noEmojis = ["😢","😭","💔","🥺","😩","🩹","❌","🤖"];
+
+  let clickCount = 0;
+  let yesScale = 1;
+  let noScale = 1;
+
+  function handleNoSelection(e){
+    e.preventDefault();
+    clickCount++;
+    yesScale += 0.3;
+    noScale -= 0.12;
+    yesBtn.style.transform = `scale(${yesScale})`;
+    if(noScale > 0.1){
+      noBtn.style.transform = `scale(${noScale})`;
+    } else {
+      noBtn.style.display = 'none';
+    }
+    const i = Math.min(clickCount-1, noMessages.length-1);
+    promptText.textContent = noMessages[i];
+    emojiDisplay.textContent = noEmojis[i];
+    hintText.textContent = "the green— I mean pink one is right there 😉";
+  }
+
+  noBtn.addEventListener('click', handleNoSelection);
+  noBtn.addEventListener('touchstart', handleNoSelection, {passive:false});
+
+  function burstConfetti(){
+    const colors = ['#ff6f91','#f4b942','#7bbf8e','#e84b73','#ffd6e0'];
+    const container = document.getElementById('confetti');
+    for(let i=0;i<26;i++){
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.background = colors[Math.floor(Math.random()*colors.length)];
+      const angle = Math.random()*Math.PI*2;
+      const dist = 80+Math.random()*140;
+      const x = Math.cos(angle)*dist;
+      const y = Math.sin(angle)*dist - 40;
+      const rot = Math.random()*360;
+      p.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+      p.animate([
+        {transform:'translate(0,0) rotate(0deg)', opacity:1},
+        {transform:`translate(${x}px,${y}px) rotate(${rot}deg)`, opacity:0}
+      ],{duration:900+Math.random()*500, easing:'cubic-bezier(.2,.6,.3,1)', fill:'forwards'});
+      container.appendChild(p);
+      setTimeout(()=>p.remove(), 1500);
+    }
+  }
+
+  yesBtn.addEventListener('click', () => {
+    askScreen.classList.add('hidden');
+    successScreen.classList.remove('hidden');
+    burstConfetti();
+  });
+
+  // planner logic
+  const selections = { movie:null, food:null, place:null };
+  document.querySelectorAll('.pill-grid').forEach(grid => {
+    const group = grid.dataset.group;
+    grid.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        grid.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+        selections[group] = pill.textContent;
+        updateSummary();
+      });
+    });
+  });
+
+  const summaryEl = document.getElementById('plan-summary');
+  const confirmBtn = document.getElementById('confirm-btn');
+
+  function updateSummary(){
+    const {movie, food, place} = selections;
+    if(movie && food && place){
+      summaryEl.innerHTML = `<span><strong>${movie}</strong> night, <strong>${food}</strong> to eat, then <strong>${place}</strong> 💕</span>`;
+      confirmBtn.classList.add('active');
+    } else {
+      const picked = [movie,food,place].filter(Boolean).length;
+      summaryEl.innerHTML = `<span class="placeholder">${picked}/3 picked — keep going ✨</span>`;
+      confirmBtn.classList.remove('active');
+    }
+  }
+
+  function heartBurst(){
+    const hearts = ['💖','💕','💗','❤️','💘'];
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.zIndex = '100';
+    document.body.appendChild(overlay);
+
+    for(let i=0;i<22;i++){
+      const h = document.createElement('div');
+      h.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+      h.style.position = 'absolute';
+      h.style.left = (45+Math.random()*10)+'%';
+      h.style.top = '55%';
+      h.style.fontSize = (1.2+Math.random()*1.6)+'rem';
+      h.style.opacity = '0';
+      overlay.appendChild(h);
+
+      const dx = (Math.random()-0.5)*260;
+      const dy = -(140+Math.random()*220);
+      const rot = (Math.random()-0.5)*60;
+      const delay = Math.random()*250;
+
+      h.animate([
+        {transform:'translate(0,0) scale(0.4) rotate(0deg)', opacity:0},
+        {transform:`translate(${dx*0.3}px,${dy*0.4}px) scale(1.1) rotate(${rot*0.5}deg)`, opacity:1, offset:0.35},
+        {transform:`translate(${dx}px,${dy}px) scale(0.8) rotate(${rot}deg)`, opacity:0}
+      ],{duration:1400+Math.random()*600, delay, easing:'cubic-bezier(.2,.6,.3,1)', fill:'forwards'});
+    }
+    setTimeout(()=>overlay.remove(), 2400);
+  }
+
+  const modalOverlay = document.getElementById('modal-overlay');
+  const modalEdit = document.getElementById('modal-edit');
+  const modalConfirm = document.getElementById('modal-confirm');
+
+  confirmBtn.addEventListener('click', () => {
+    if(!confirmBtn.classList.contains('active')) return;
+    document.getElementById('modal-movie').textContent = selections.movie;
+    document.getElementById('modal-food').textContent = selections.food;
+    document.getElementById('modal-place').textContent = selections.place;
+    modalOverlay.classList.add('show');
+  });
+
+  modalEdit.addEventListener('click', () => {
+    modalOverlay.classList.remove('show');
+  });
+
+  modalConfirm.addEventListener('click', () => {
+    modalOverlay.classList.remove('show');
+    heartBurst();
+    successScreen.classList.add('hidden');
+    finalScreen.classList.remove('hidden');
+    document.getElementById('final-detail').textContent =
+      `${selections.movie} • ${selections.food} • ${selections.place}`;
+    burstConfetti();
+  });
+
+  // tap outside the box to dismiss
+  modalOverlay.addEventListener('click', (e) => {
+    if(e.target === modalOverlay) modalOverlay.classList.remove('show');
+  });
+</script>
+</body>
+</html>
